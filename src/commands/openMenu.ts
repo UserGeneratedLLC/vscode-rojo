@@ -10,6 +10,12 @@ import { installPlugin } from "../installPlugin"
 import { installRojo } from "../installRojo"
 import { result } from "../result"
 import { serveProject } from "../serveProject"
+import {
+  formatProjectDisplayNames,
+  getWorkspaceFolderName,
+  isExternalProject,
+} from "../projectDisplay"
+import { getConfigSetting, ThreeStateOption } from "../configuration"
 import which = require("which")
 
 const stopAndServeButton = {
@@ -88,7 +94,12 @@ function showSwitchMessage(install: RojoInstall) {
   const installType = install.installType
 
   // Tell the user about Aftman once per session
-  if (!(installType === InstallType.aftman || installType === InstallType.rokit) && !aftmanMessageSent) {
+  if (
+    !(
+      installType === InstallType.aftman || installType === InstallType.rokit
+    ) &&
+    !aftmanMessageSent
+  ) {
     aftmanMessageSent = true
 
     let details = ""
@@ -172,7 +183,7 @@ async function generateProjectMenu(
   state: State,
   projectFiles: ProjectFile[]
 ): Promise<PickItem[]> {
-  const projectFileRojoVersions: Map<typeof projectFiles[0], string | null> =
+  const projectFileRojoVersions: Map<(typeof projectFiles)[0], string | null> =
     new Map()
   const rojoVersions: { [index: string]: true } = {}
 
@@ -217,13 +228,48 @@ async function generateProjectMenu(
     return rojoNotInstalled
   }
 
-  const runningItems = Object.values(state.running).map(({ projectFile }) => ({
-    label: `$(debug-stop) ${projectFile.name}`,
-    description: projectFile.workspaceFolderName,
-    projectFile,
-    action: "stop",
-    buttons: [openFileButton, buildButton],
-  }))
+  const allProjectFiles = [
+    ...projectFiles,
+    ...Object.values(state.running).map((r) => r.projectFile),
+  ]
+  const displayInfo = formatProjectDisplayNames(allProjectFiles)
+
+  const runningItems = Object.values(state.running).map(({ projectFile }) => {
+    const info = displayInfo.get(projectFile.path.fsPath)
+    return {
+      label: `$(debug-stop) ${info?.displayName ?? projectFile.name}`,
+      description: getWorkspaceFolderName(projectFile),
+      detail: (() => {
+        const showFullPathMode = getConfigSetting("showFullPath")
+        const shouldShowFullPath =
+          showFullPathMode === ThreeStateOption.Always ||
+          (showFullPathMode === ThreeStateOption.AsNeeded &&
+            (isExternalProject(projectFile) || info?.wasTruncated))
+
+        if (!shouldShowFullPath) {
+          return undefined
+        }
+
+        if (isExternalProject(projectFile)) {
+          return `Full path: ${projectFile.path.fsPath.replace(/\\/g, "/")}`
+        } else if (
+          showFullPathMode === ThreeStateOption.Always ||
+          info?.wasTruncated
+        ) {
+          // For workspace projects: show full path if "always" mode or if truncated
+          const pathToShow =
+            showFullPathMode === ThreeStateOption.Always
+              ? projectFile.path.fsPath.replace(/\\/g, "/")
+              : info?.originalName
+          return `Full path: ${pathToShow}`
+        }
+        return undefined
+      })(),
+      projectFile,
+      action: "stop",
+      buttons: [openFileButton, buildButton],
+    }
+  })
 
   const isAnyRunning = Object.values(state.running).length > 0
 
@@ -236,16 +282,48 @@ async function generateProjectMenu(
       continue
     }
 
+    const info = displayInfo.get(projectFile.path.fsPath)
+
+    const detailParts: string[] = []
+
+    if (!isInstalled) {
+      detailParts.push(
+        `        Rojo not detected in ${getWorkspaceFolderName(projectFile)}`
+      )
+    } else if (allRojoVersions.length > 1) {
+      detailParts.push(`v${projectFileRojoVersions.get(projectFile)}`)
+    }
+
+    // Show full path based on configuration
+    const showFullPathMode = getConfigSetting("showFullPath")
+    const shouldShowFullPath =
+      showFullPathMode === ThreeStateOption.Always ||
+      (showFullPathMode === ThreeStateOption.AsNeeded &&
+        (isExternalProject(projectFile) || info?.wasTruncated))
+
+    if (shouldShowFullPath) {
+      if (isExternalProject(projectFile)) {
+        const normalizedPath = projectFile.path.fsPath.replace(/\\/g, "/")
+        detailParts.push(`Full path: ${normalizedPath}`)
+      } else if (
+        showFullPathMode === ThreeStateOption.Always ||
+        info?.wasTruncated
+      ) {
+        // For workspace projects: show full path if "always" mode or if truncated
+        const pathToShow =
+          showFullPathMode === ThreeStateOption.Always
+            ? projectFile.path.fsPath.replace(/\\/g, "/")
+            : info?.originalName
+        detailParts.push(`Full path: ${pathToShow}`)
+      }
+    }
+
     projectFileItems.push({
       label: `$(${isInstalled ? "debug-start" : "warning"}) ${
-        projectFile.name
+        info?.displayName ?? projectFile.name
       }`,
-      description: projectFile.workspaceFolderName,
-      detail: !isInstalled
-        ? `        Rojo not detected in ${projectFile.workspaceFolderName}`
-        : allRojoVersions.length > 1
-        ? `v${projectFileRojoVersions.get(projectFile)}`
-        : undefined,
+      description: getWorkspaceFolderName(projectFile),
+      detail: detailParts.length > 0 ? detailParts.join(" • ") : undefined,
       action: isInstalled ? "start" : undefined,
       projectFile,
       buttons: [
