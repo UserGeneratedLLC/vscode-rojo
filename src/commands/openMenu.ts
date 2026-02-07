@@ -336,50 +336,25 @@ async function generateProjectMenu(
 
   return [
     {
-      label: "$(rocket) Atlas",
-      description:
-        allRojoVersions.length === 1
-          ? `v${allRojoVersions[0]}`
-          : `${allRojoVersions.length} versions of Rojo installed`,
-      detail: getInstallDetail(installType, mixed),
-      info: true,
-    },
-    {
-      label: "$(plug) Install Roblox Studio Plugin",
-      description: "Click to install.",
-      info: true,
-      action: "installPlugin",
-      projectFile: projectFiles[0],
-    },
-    {
-      label: "$(link-external) Open Rojo Docs (rojo.space)",
-      info: true,
-      action: "openDocs",
-    },
-    {
-      label: "$(comments-view-icon) Need help?",
-      description: "Click to join the Roblox Open Source Discord",
-      info: true,
-      action: "openDiscord",
-    },
-    {
-      label: "$(terminal) Open Studio",
-      description: "Launch rojo studio for a project.",
-      info: true,
+      label: "$(terminal) Studio",
+      description: "Launch Roblox Studio for this project.",
       action: "rojoStudio",
       projectFile: projectFiles[0],
     },
     {
       label: "$(cloud-download) Syncback",
-      description: "Pull instances from a Roblox file to the filesystem.",
-      info: true,
+      description: "Syncback to the current studio version of Project.rbxl",
       action: "syncback",
       projectFile: projectFiles[0],
     },
     {
-      label: "―――――――――――― $(versions) Projects in this workspace ―――――――――――",
-      detail:
-        "Click to start live syncing, or build with the build button on the right.",
+      label: "$(plug) Install Plugin",
+      description: "Click to install.",
+      action: "installPlugin",
+      projectFile: projectFiles[0],
+    },
+    {
+      label: "―――――――――――― Projects ―――――――――――",
       info: true,
     },
     ...runningItems,
@@ -593,7 +568,6 @@ export const openMenuCommand = (state: State) =>
             name: `Atlas: rojo studio`,
             cwd: studioFolder,
           })
-          studioTerminal.show()
           studioTerminal.sendText(`rojo studio "${studioFile}"`)
 
           input.hide()
