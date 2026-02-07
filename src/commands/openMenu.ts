@@ -172,11 +172,11 @@ async function handleInstallError(error: string) {
   )
 
   if (error.includes("Foreman") && location) {
-    showSwitchMessage({
-      installType: InstallType.foreman,
-      resolvedPath: location,
-      version: "?",
-    })
+    // showSwitchMessage({
+    //   installType: InstallType.foreman,
+    //   resolvedPath: location,
+    //   version: "?",
+    // })
   }
 }
 
@@ -210,7 +210,7 @@ async function generateProjectMenu(
           mixed = true
         }
 
-        showSwitchMessage(install)
+        // showSwitchMessage(install)
       }
 
       projectFileRojoVersions.set(projectFile, install ? install.version : null)
