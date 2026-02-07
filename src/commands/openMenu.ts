@@ -348,6 +348,12 @@ async function generateProjectMenu(
       projectFile: projectFiles[0],
     },
     {
+      label: "$(file-code) Generate Sourcemap",
+      description: "Generate a sourcemap.json for this project.",
+      action: "sourcemap",
+      projectFile: projectFiles[0],
+    },
+    {
       label: "$(plug) Install Plugin",
       description: "Click to install.",
       action: "installPlugin",
@@ -601,6 +607,28 @@ export const openMenuCommand = (state: State) =>
           })
           syncbackTerminal.show()
           syncbackTerminal.sendText(`atlas syncback "${syncbackFile}"`)
+
+          input.hide()
+          break
+        }
+        case "sourcemap": {
+          if (!selectedItem.projectFile) {
+            return
+          }
+
+          const sourcemapFolder = path.dirname(
+            selectedItem.projectFile.path.fsPath,
+          )
+          const sourcemapFile = path.basename(
+            selectedItem.projectFile.path.fsPath,
+          )
+
+          const sourcemapTerminal = vscode.window.createTerminal({
+            name: `Atlas: atlas sourcemap`,
+            cwd: sourcemapFolder,
+          })
+          sourcemapTerminal.show()
+          sourcemapTerminal.sendText(`atlas sourcemap "${sourcemapFile}"`)
 
           input.hide()
           break
