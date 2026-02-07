@@ -164,7 +164,7 @@ async function handleInstallError(error: string) {
   const location = await which("atlas").catch(() => null)
 
   vscode.window.showErrorMessage(
-    `Trying to use Rojo executable found at ${
+    `Trying to use Atlas executable found at ${
       location ?? "?"
     } resulted in an error: (${error}).` +
       `Fix or delete this file manually and try again.`,
