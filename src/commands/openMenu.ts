@@ -131,8 +131,8 @@ function showSwitchMessage(install: RojoInstall) {
 
         vscode.window
           .showWarningMessage(
-            `This will delete the rojo.exe in your path from ${install.resolvedPath}.` +
-              ` After that, we will prompt you to install Rojo with Aftman. Is this OK?`,
+            `This will delete the atlas.exe in your path from ${install.resolvedPath}.` +
+              ` After that, we will prompt you to install Atlas with Aftman. Is this OK?`,
             "Yes",
             "No",
           )
@@ -161,7 +161,7 @@ function showSwitchMessage(install: RojoInstall) {
 }
 
 async function handleInstallError(error: string) {
-  const location = await which("rojo").catch(() => null)
+  const location = await which("atlas").catch(() => null)
 
   vscode.window.showErrorMessage(
     `Trying to use Rojo executable found at ${
@@ -409,7 +409,8 @@ export const openMenuCommand = (state: State) =>
             },
             {
               label: "$(new-file) Create one now",
-              detail: "This will run the `rojo init` in your workspace folder.",
+              detail:
+                "This will run the `atlas init` in your workspace folder.",
               action: "create",
               projectFile: defaultProjectFile,
             },
@@ -565,10 +566,10 @@ export const openMenuCommand = (state: State) =>
           const studioFile = path.basename(selectedItem.projectFile.path.fsPath)
 
           const studioTerminal = vscode.window.createTerminal({
-            name: `Atlas: rojo studio`,
+            name: `Atlas: atlas studio`,
             cwd: studioFolder,
           })
-          studioTerminal.sendText(`rojo studio "${studioFile}"`)
+          studioTerminal.sendText(`atlas studio "${studioFile}"`)
 
           input.hide()
           break
@@ -595,11 +596,11 @@ export const openMenuCommand = (state: State) =>
           )
 
           const syncbackTerminal = vscode.window.createTerminal({
-            name: `Atlas: rojo syncback`,
+            name: `Atlas: atlas syncback`,
             cwd: syncbackFolder,
           })
           syncbackTerminal.show()
-          syncbackTerminal.sendText(`rojo syncback "${syncbackFile}"`)
+          syncbackTerminal.sendText(`atlas syncback "${syncbackFile}"`)
 
           input.hide()
           break

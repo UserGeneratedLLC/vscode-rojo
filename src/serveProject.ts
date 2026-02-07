@@ -13,7 +13,7 @@ export type RunningProject = {
 export function serveProject(state: State, projectFile: ProjectFile) {
   const projectFilePath = projectFile.path.fsPath
 
-  state.context.workspaceState.update("rojoLastPath", projectFilePath)
+  state.context.workspaceState.update("atlasLastPath", projectFilePath)
 
   if (state.running[projectFilePath]) {
     throw new Error("This project is already running")
@@ -27,7 +27,7 @@ export function serveProject(state: State, projectFile: ProjectFile) {
     cwd: projectFileFolder,
   })
   terminal.show()
-  terminal.sendText(`rojo serve "${projectFileName}"`)
+  terminal.sendText(`atlas serve "${projectFileName}"`)
 
   // Track the terminal so we can stop it
   const disposeListener = vscode.window.onDidCloseTerminal((closedTerminal) => {

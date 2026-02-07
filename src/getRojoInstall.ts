@@ -43,7 +43,7 @@ export async function getRojoInstall(
   const projectFilePath = projectFile.path.fsPath
   const projectFileFolder = path.dirname(projectFilePath)
 
-  const resolvedPath = await which("rojo").catch(() => null)
+  const resolvedPath = await which("atlas").catch(() => null)
 
   if (resolvedPath === null) {
     return null
@@ -53,7 +53,7 @@ export async function getRojoInstall(
     { stderr: string; stdout: string },
     ExecError
   >(
-    exec("rojo --version", {
+    exec("atlas --version", {
       cwd: projectFileFolder,
     }),
   )

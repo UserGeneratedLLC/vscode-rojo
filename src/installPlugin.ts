@@ -10,7 +10,7 @@ export async function installPlugin(projectFile: ProjectFile) {
   const projectFilePath = projectFile.path.fsPath
   const projectFileFolder = path.dirname(projectFilePath)
 
-  const output = await exec(`rojo plugin install`, {
+  const output = await exec(`atlas plugin install`, {
     cwd: projectFileFolder,
   })
 

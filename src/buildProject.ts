@@ -21,7 +21,7 @@ export async function buildProject(projectFile: ProjectFile) {
   const artifactName = `${name}.${isPlace ? "rbxl" : "rbxm"}`
 
   const output = await exec(
-    `rojo build "${path.basename(projectFilePath)}" --output "${artifactName}"`,
+    `atlas build "${path.basename(projectFilePath)}" --output "${artifactName}"`,
     {
       cwd: projectFileFolder,
     },

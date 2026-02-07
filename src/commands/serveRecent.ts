@@ -7,7 +7,7 @@ import { serveProject } from "../serveProject"
 export const serveRecentCommand = (state: State) =>
   vscode.commands.registerCommand("vscode-atlas.serveRecent", async () => {
     const lastFilePath: string | undefined =
-      state.context.workspaceState.get("rojoLastPath")
+      state.context.workspaceState.get("atlasLastPath")
 
     if (lastFilePath) {
       try {
