@@ -38,7 +38,7 @@ function getInstallType(resolvedPath: string) {
 }
 
 export async function getRojoInstall(
-  projectFile: ProjectFile
+  projectFile: ProjectFile,
 ): Promise<RojoInstall | null> {
   const projectFilePath = projectFile.path.fsPath
   const projectFileFolder = path.dirname(projectFilePath)
@@ -55,7 +55,7 @@ export async function getRojoInstall(
   >(
     exec("rojo --version", {
       cwd: projectFileFolder,
-    })
+    }),
   )
 
   if (outputResult.ok) {
@@ -82,12 +82,15 @@ export async function getRojoInstall(
       resolvedPath,
     }
   } else {
-    if (outputResult.error.stderr.includes("aftman") || outputResult.error.stderr.includes("rokit")) {
+    if (
+      outputResult.error.stderr.includes("aftman") ||
+      outputResult.error.stderr.includes("rokit")
+    ) {
       return null
     }
 
     return Promise.reject(
-      outputResult.error.stderr || outputResult.error.stdout
+      outputResult.error.stderr || outputResult.error.stdout,
     )
   }
 }

@@ -12,7 +12,7 @@ export async function buildProject(projectFile: ProjectFile) {
   const projectFileFolder = path.dirname(projectFilePath)
 
   const config = JSON.parse(
-    await fs.readFile(projectFilePath, { encoding: "utf-8" })
+    await fs.readFile(projectFilePath, { encoding: "utf-8" }),
   )
 
   const name = config.name || "build"
@@ -24,7 +24,7 @@ export async function buildProject(projectFile: ProjectFile) {
     `rojo build "${path.basename(projectFilePath)}" --output "${artifactName}"`,
     {
       cwd: projectFileFolder,
-    }
+    },
   )
 
   if (output.stderr.length > 0) {

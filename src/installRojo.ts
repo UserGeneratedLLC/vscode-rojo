@@ -50,7 +50,7 @@ export interface Asset {
 }
 
 export function promisifyStream(
-  stream: fs.ReadStream | fs.WriteStream | Duplex
+  stream: fs.ReadStream | fs.WriteStream | Duplex,
 ): Promise<unknown> {
   return new Promise((resolve, reject) => {
     stream.on("close", resolve)
@@ -86,7 +86,7 @@ function findCompatibleAsset(assets: Asset[]): Asset | null {
 
   if (!currentPlatform || !currentArch) {
     throw new Error(
-      `Your current platform is unknown. Platform: ${os.platform()}, Architecture: ${os.arch()}`
+      `Your current platform is unknown. Platform: ${os.platform()}, Architecture: ${os.arch()}`,
     )
   }
 
@@ -111,7 +111,7 @@ export async function installRojo(folder: string) {
   if (!(await isAftmanInstalled())) {
     console.log("Aftman not installed")
     const latestReleaseResponse = await fetch(
-      "https://latest-github-release.eryn.io/lpghatguy/aftman"
+      "https://latest-github-release.eryn.io/lpghatguy/aftman",
     )
 
     if (!latestReleaseResponse.ok) {
@@ -129,7 +129,7 @@ export async function installRojo(folder: string) {
 
     if (!asset) {
       return Promise.reject(
-        `We couldn't find a compatible Aftman release for your platform/architecture: ${os.arch()} ${os.platform()}`
+        `We couldn't find a compatible Aftman release for your platform/architecture: ${os.arch()} ${os.platform()}`,
       )
     }
 
@@ -137,13 +137,13 @@ export async function installRojo(folder: string) {
 
     if (!download.ok) {
       return Promise.reject(
-        `Response from GitHub binary download not ok: ${download.status} ${download.statusText}`
+        `Response from GitHub binary download not ok: ${download.status} ${download.statusText}`,
       )
     }
 
     const tempPath = path.join(
       os.tmpdir(),
-      "aftman" + (os.platform() === "win32" ? ".exe" : "")
+      "aftman" + (os.platform() === "win32" ? ".exe" : ""),
     )
     const writeStream = fs.createWriteStream(tempPath)
 
@@ -170,7 +170,7 @@ export async function installRojo(folder: string) {
 
     vscode.window.showInformationMessage(
       "Successfully installed Aftman on your system. " +
-        "It has been added to your system PATH, and is usable from the command line if needed. "
+        "It has been added to your system PATH, and is usable from the command line if needed. ",
     )
 
     if ("PATH" in process.env) {
@@ -185,7 +185,7 @@ export async function installRojo(folder: string) {
   })
 
   const aftmanToml = await lstat(path.join(folder, "aftman.toml")).catch(
-    () => null
+    () => null,
   )
 
   if (aftmanToml) {

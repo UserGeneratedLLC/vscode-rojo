@@ -40,7 +40,7 @@ export function getAdditionalProjectPaths(): string[] {
   } catch (error) {
     console.error(
       "Failed to get additional project paths configuration:",
-      error
+      error,
     )
     return []
   }
@@ -65,7 +65,7 @@ export function getConfigSetting(settingName: string): ThreeStateOption {
         return ThreeStateOption.Always
       default:
         console.warn(
-          `Invalid ${settingName} setting: ${value}. Defaulting to 'asNeeded'.`
+          `Invalid ${settingName} setting: ${value}. Defaulting to 'asNeeded'.`,
         )
         return ThreeStateOption.AsNeeded
     }

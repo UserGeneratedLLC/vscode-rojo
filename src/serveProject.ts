@@ -23,7 +23,7 @@ export function serveProject(state: State, projectFile: ProjectFile) {
   const projectFileFolder = path.dirname(projectFilePath)
 
   const outputChannel = vscode.window.createOutputChannel(
-    `Atlas: ${formatProjectDisplayName(projectFile)}`
+    `Atlas: ${formatProjectDisplayName(projectFile)}`,
   )
 
   const child = childProcess.spawn(
@@ -31,7 +31,7 @@ export function serveProject(state: State, projectFile: ProjectFile) {
     ["serve", path.basename(projectFilePath), "--color", "never"],
     {
       cwd: projectFileFolder,
-    }
+    },
   )
 
   {

@@ -13,7 +13,7 @@ export async function findProjectFiles(): Promise<ProjectFile[]> {
 
   if (!folders) {
     return Promise.reject(
-      "You must open VS Code on a workspace folder to do this."
+      "You must open VS Code on a workspace folder to do this.",
     )
   }
 
@@ -25,7 +25,7 @@ export async function findProjectFiles(): Promise<ProjectFile[]> {
       workspaceFolder,
       workspaceFolder.uri,
       projectFiles,
-      foundPaths
+      foundPaths,
     )
 
     const additionalPaths = getAdditionalProjectPaths()
@@ -56,7 +56,7 @@ export async function findProjectFiles(): Promise<ProjectFile[]> {
         contextWorkspaceFolder,
         searchUri,
         projectFiles,
-        foundPaths
+        foundPaths,
       )
     }
   }
@@ -68,13 +68,17 @@ async function searchForProjectFiles(
   workspaceFolder: vscode.WorkspaceFolder,
   searchUri: vscode.Uri,
   projectFiles: ProjectFile[],
-  foundPaths: Set<string>
+  foundPaths: Set<string>,
 ): Promise<void> {
   try {
     const fileNames = (await vscode.workspace.fs.readDirectory(searchUri))
       .filter(([, fileType]) => fileType === vscode.FileType.File)
       .map(([fileName]) => fileName)
-      .filter((fileName) => fileName.endsWith(".project.json5") || fileName.endsWith(".project.json"))
+      .filter(
+        (fileName) =>
+          fileName.endsWith(".project.json5") ||
+          fileName.endsWith(".project.json"),
+      )
 
     for (const fileName of fileNames) {
       const filePath = vscode.Uri.joinPath(searchUri, fileName)

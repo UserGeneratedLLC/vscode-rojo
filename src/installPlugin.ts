@@ -16,14 +16,14 @@ export async function installPlugin(projectFile: ProjectFile) {
 
   if (output.stderr.length > 0) {
     vscode.window.showErrorMessage(
-      "Atlas plugin install failed: " + output.stderr
+      "Atlas plugin install failed: " + output.stderr,
     )
   } else {
     vscode.window.showInformationMessage(
       "Atlas: " +
         (output.stdout.length > 0
           ? output.stdout
-          : "Roblox Studio plugin installed!")
+          : "Roblox Studio plugin installed!"),
     )
   }
 }

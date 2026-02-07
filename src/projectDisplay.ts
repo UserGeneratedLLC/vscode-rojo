@@ -27,7 +27,7 @@ export function isExternalProject(projectFile: ProjectFile): boolean {
   for (const folder of workspaceFolders) {
     const relativePath = path.relative(
       folder.uri.fsPath,
-      projectFile.path.fsPath
+      projectFile.path.fsPath,
     )
     if (!relativePath.startsWith("..") && !path.isAbsolute(relativePath)) {
       return false
@@ -96,7 +96,7 @@ function getConflictingFilenames(projectFiles: ProjectFile[]): Set<string> {
  * Groups external projects that would have identical display names using parentDir/filename format
  */
 function getExternalProjectConflicts(
-  projectFiles: ProjectFile[]
+  projectFiles: ProjectFile[],
 ): Map<string, ProjectFile[]> {
   const externalProjects = projectFiles.filter(isExternalProject)
   const displayNameGroups = new Map<string, ProjectFile[]>()
@@ -129,7 +129,7 @@ function getExternalProjectConflicts(
  * Generates unique display paths for conflicting external projects by walking up directory trees
  */
 function getUniqueDisplayPaths(
-  conflictingProjects: ProjectFile[]
+  conflictingProjects: ProjectFile[],
 ): Map<string, string> {
   const result = new Map<string, string>()
 
@@ -196,7 +196,7 @@ function getUniqueDisplayPaths(
  */
 export function formatProjectDisplayName(
   projectFile: ProjectFile,
-  displayMode?: ThreeStateOption
+  displayMode?: ThreeStateOption,
 ): string {
   const mode = displayMode ?? getConfigSetting("projectPathDisplay")
 
@@ -227,7 +227,7 @@ export function formatProjectDisplayName(
 export function formatProjectDisplayNames(
   projectFiles: ProjectFile[],
   displayMode?: ThreeStateOption,
-  maxLength: number = 70
+  maxLength: number = 70,
 ): Map<string, ProjectDisplayInfo> {
   const mode = displayMode ?? getConfigSetting("projectPathDisplay")
   const projectDisplayMap = new Map<string, string>()
@@ -237,7 +237,7 @@ export function formatProjectDisplayNames(
       for (const projectFile of projectFiles) {
         projectDisplayMap.set(
           projectFile.path.fsPath,
-          getProjectFilename(projectFile)
+          getProjectFilename(projectFile),
         )
       }
       break
@@ -247,7 +247,7 @@ export function formatProjectDisplayNames(
       for (const projectFile of projectFiles) {
         projectDisplayMap.set(
           projectFile.path.fsPath,
-          getProjectRelativePath(projectFile)
+          getProjectRelativePath(projectFile),
         )
       }
       break
@@ -288,7 +288,7 @@ export function formatProjectDisplayNames(
       for (const projectFile of projectFiles) {
         projectDisplayMap.set(
           projectFile.path.fsPath,
-          getProjectFilename(projectFile)
+          getProjectFilename(projectFile),
         )
       }
       break
@@ -314,7 +314,7 @@ export function formatProjectDisplayNames(
  */
 function truncateDisplayName(
   displayName: string,
-  maxLength: number = 70
+  maxLength: number = 70,
 ): { name: string; wasTruncated: boolean; originalName: string } {
   if (displayName.length <= maxLength) {
     return { name: displayName, wasTruncated: false, originalName: displayName }

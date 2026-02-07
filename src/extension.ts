@@ -18,20 +18,24 @@ export function activate(context: vscode.ExtensionContext) {
   // Check for conflicting original Rojo extension
   const rojoExtension = vscode.extensions.getExtension("evaera.vscode-rojo")
   if (rojoExtension) {
-    vscode.window.showWarningMessage(
-      "Atlas: The original Rojo extension (evaera.vscode-rojo) is installed and will conflict with Atlas. Please disable or uninstall it.",
-      "Open Extensions"
-    ).then((choice) => {
-      if (choice === "Open Extensions") {
-        vscode.commands.executeCommand("workbench.extensions.action.showInstalledExtensions")
-      }
-    })
+    vscode.window
+      .showWarningMessage(
+        "Atlas: The original Rojo extension (evaera.vscode-rojo) is installed and will conflict with Atlas. Please disable or uninstall it.",
+        "Open Extensions",
+      )
+      .then((choice) => {
+        if (choice === "Open Extensions") {
+          vscode.commands.executeCommand(
+            "workbench.extensions.action.showInstalledExtensions",
+          )
+        }
+      })
   }
 
   const state: State = {
     resumeButton: vscode.window.createStatusBarItem(
       vscode.StatusBarAlignment.Right,
-      199
+      199,
     ),
     running: {},
     context,
@@ -39,7 +43,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   const button = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Right,
-    200
+    200,
   )
   button.command = "vscode-atlas.openMenu"
   button.text = "$(rocket) Atlas"
@@ -49,19 +53,21 @@ export function activate(context: vscode.ExtensionContext) {
   state.resumeButton.show()
 
   context.subscriptions.push(
-    ...Object.values(commands).map((command) => command(state))
+    ...Object.values(commands).map((command) => command(state)),
   )
 
-  configurationDisposable = vscode.workspace.onDidChangeConfiguration((event) => {
-    if (event.affectsConfiguration("atlas.additionalProjectPaths")) {
-      console.log("atlas.additionalProjectPaths configuration changed")
-      
-      vscode.window.showInformationMessage(
-        "Atlas: Additional project paths updated. New paths will be searched when opening the project menu.",
-        { modal: false }
-      )
-    }
-  })
+  configurationDisposable = vscode.workspace.onDidChangeConfiguration(
+    (event) => {
+      if (event.affectsConfiguration("atlas.additionalProjectPaths")) {
+        console.log("atlas.additionalProjectPaths configuration changed")
+
+        vscode.window.showInformationMessage(
+          "Atlas: Additional project paths updated. New paths will be searched when opening the project menu.",
+          { modal: false },
+        )
+      }
+    },
+  )
 
   context.subscriptions.push(configurationDisposable)
 
@@ -79,7 +85,7 @@ export function activate(context: vscode.ExtensionContext) {
       .showInformationMessage(
         "The Atlas extension has received a major upgrade. We recommend reading the extension description page.",
         "Open extension page",
-        "Don't show this again"
+        "Don't show this again",
       )
       .then((option) => {
         if (!option) {
@@ -91,7 +97,7 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.Uri.from({
               scheme: vscode.env.uriScheme,
               path: "extension/UserGeneratedLLC.vscode-atlas",
-            })
+            }),
           )
         }
 

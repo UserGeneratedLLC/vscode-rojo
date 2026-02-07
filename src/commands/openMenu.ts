@@ -71,22 +71,21 @@ type PickItem = {
 
 function getInstallDetail(
   installType: InstallType | undefined,
-  mixed: boolean
+  mixed: boolean,
 ) {
   if (!installType) {
-    return "Rojo is not installed. Atlas requires Rojo to function."
+    return "Atlas is not installed (Rojo not found)."
   }
 
   if (mixed) {
     return "Rojo install method differs by project file."
-
   }
 
   if (installType === InstallType.global) {
-    return "Rojo is globally installed."
+    return "Atlas is globally installed."
   }
 
-  return `Rojo is managed by ${installType}`
+  return `Atlas is managed by ${installType}`
 }
 
 let aftmanMessageSent = false
@@ -120,10 +119,10 @@ function showSwitchMessage(install: RojoInstall) {
       .showInformationMessage(
         `${getInstallDetail(
           installType,
-          false
+          false,
         )} You should consider using Aftman instead to manage your tool chains.` +
           details,
-        "Switch to Aftman"
+        "Switch to Aftman",
       )
       .then((response) => {
         if (!response) {
@@ -135,7 +134,7 @@ function showSwitchMessage(install: RojoInstall) {
             `This will delete the rojo.exe in your path from ${install.resolvedPath}.` +
               ` After that, we will prompt you to install Rojo with Aftman. Is this OK?`,
             "Yes",
-            "No"
+            "No",
           )
           .then((answer) => {
             if (answer !== "Yes") {
@@ -153,9 +152,9 @@ function showSwitchMessage(install: RojoInstall) {
             },
             (e) => {
               vscode.window.showErrorMessage(
-                `Could not complete operation: ${e}`
+                `Could not complete operation: ${e}`,
               )
-            }
+            },
           )
       })
   }
@@ -168,7 +167,7 @@ async function handleInstallError(error: string) {
     `Trying to use Rojo executable found at ${
       location ?? "?"
     } resulted in an error: (${error}).` +
-      `Fix or delete this file manually and try again.`
+      `Fix or delete this file manually and try again.`,
   )
 
   if (error.includes("Foreman") && location) {
@@ -182,7 +181,7 @@ async function handleInstallError(error: string) {
 
 async function generateProjectMenu(
   state: State,
-  projectFiles: ProjectFile[]
+  projectFiles: ProjectFile[],
 ): Promise<PickItem[]> {
   const projectFileRojoVersions: Map<(typeof projectFiles)[0], string | null> =
     new Map()
@@ -195,7 +194,7 @@ async function generateProjectMenu(
 
   for (const projectFile of projectFiles) {
     const installResult = await result<RojoInstall | null, string>(
-      getRojoInstall(projectFile)
+      getRojoInstall(projectFile),
     )
 
     if (installResult.ok) {
@@ -289,8 +288,7 @@ async function generateProjectMenu(
 
     if (!isInstalled) {
       detailParts.push(
-        `        Rojo not detected in ${getWorkspaceFolderName(projectFile)}`
-
+        `        Rojo not detected in ${getWorkspaceFolderName(projectFile)}`,
       )
     } else if (allRojoVersions.length > 1) {
       detailParts.push(`v${projectFileRojoVersions.get(projectFile)}`)
@@ -365,6 +363,20 @@ async function generateProjectMenu(
       action: "openDiscord",
     },
     {
+      label: "$(terminal) Open Studio",
+      description: "Launch rojo studio for a project.",
+      info: true,
+      action: "rojoStudio",
+      projectFile: projectFiles[0],
+    },
+    {
+      label: "$(cloud-download) Syncback",
+      description: "Pull instances from a Roblox file to the filesystem.",
+      info: true,
+      action: "syncback",
+      projectFile: projectFiles[0],
+    },
+    {
       label: "―――――――――――― $(versions) Projects in this workspace ―――――――――――",
       detail:
         "Click to start live syncing, or build with the build button on the right.",
@@ -393,7 +405,7 @@ export const openMenuCommand = (state: State) =>
     if (projectFiles.length === 0) {
       if (!vscode.workspace.workspaceFolders) {
         vscode.window.showErrorMessage(
-          "You must open VS Code on a workspace folder to do this."
+          "You must open VS Code on a workspace folder to do this.",
         )
         return
       }
@@ -407,7 +419,7 @@ export const openMenuCommand = (state: State) =>
       }
 
       const installResult = await result<RojoInstall | null, string>(
-        getRojoInstall(defaultProjectFile)
+        getRojoInstall(defaultProjectFile),
       )
 
       if (installResult.ok) {
@@ -460,7 +472,7 @@ export const openMenuCommand = (state: State) =>
             await buildProject(item.projectFile)
           } catch (e) {
             vscode.window.showErrorMessage(
-              "Atlas build errored: " + (e as any).toString()
+              "Atlas build errored: " + (e as any).toString(),
             )
           }
           break
@@ -475,7 +487,7 @@ export const openMenuCommand = (state: State) =>
           } catch (e) {
             vscode.window.showErrorMessage(
               "Atlas: Something went wrong when starting Rojo. Error: " +
-                (e as any).toString()
+                (e as any).toString(),
             )
           }
 
@@ -504,7 +516,7 @@ export const openMenuCommand = (state: State) =>
           } catch (e) {
             vscode.window.showErrorMessage(
               "Atlas: Something went wrong when starting Rojo. Error: " +
-                (e as any).toString()
+                (e as any).toString(),
             )
           }
 
@@ -520,7 +532,7 @@ export const openMenuCommand = (state: State) =>
             } catch (e) {
               vscode.window.showErrorMessage(
                 "Atlas: Couldn't stop Rojo process. Error: " +
-                  (e as any).toString()
+                  (e as any).toString(),
               )
             }
           }
@@ -530,13 +542,13 @@ export const openMenuCommand = (state: State) =>
         }
         case "openDocs": {
           vscode.env.openExternal(
-            vscode.Uri.parse("https://rojo.space/docs/v7/")
+            vscode.Uri.parse("https://rojo.space/docs/v7/"),
           )
           break
         }
         case "openDiscord": {
           vscode.env.openExternal(
-            vscode.Uri.parse("https://discord.gg/wH5ncNS")
+            vscode.Uri.parse("https://discord.gg/wH5ncNS"),
           )
           break
         }
@@ -552,7 +564,7 @@ export const openMenuCommand = (state: State) =>
             })
             .catch((e) => {
               vscode.window.showErrorMessage(
-                `Could not create Rojo project: ${e}`
+                `Could not create Rojo project: ${e}`,
               )
             })
           break
@@ -567,10 +579,61 @@ export const openMenuCommand = (state: State) =>
           })
           break
         }
+        case "rojoStudio": {
+          if (!selectedItem.projectFile) {
+            return
+          }
+
+          const studioFolder = path.dirname(
+            selectedItem.projectFile.path.fsPath,
+          )
+          const studioFile = path.basename(selectedItem.projectFile.path.fsPath)
+
+          const studioTerminal = vscode.window.createTerminal({
+            name: `Atlas: rojo studio`,
+            cwd: studioFolder,
+          })
+          studioTerminal.show()
+          studioTerminal.sendText(`rojo studio "${studioFile}"`)
+
+          input.hide()
+          break
+        }
+        case "syncback": {
+          if (!selectedItem.projectFile) {
+            return
+          }
+
+          // Stop all running serve sessions before syncback
+          for (const runningProject of Object.values(state.running)) {
+            try {
+              runningProject.stop()
+            } catch (e) {
+              // best effort
+            }
+          }
+
+          const syncbackFolder = path.dirname(
+            selectedItem.projectFile.path.fsPath,
+          )
+          const syncbackFile = path.basename(
+            selectedItem.projectFile.path.fsPath,
+          )
+
+          const syncbackTerminal = vscode.window.createTerminal({
+            name: `Atlas: rojo syncback`,
+            cwd: syncbackFolder,
+          })
+          syncbackTerminal.show()
+          syncbackTerminal.sendText(`rojo syncback "${syncbackFile}"`)
+
+          input.hide()
+          break
+        }
         case "install": {
           if (!vscode.workspace.workspaceFolders) {
             vscode.window.showErrorMessage(
-              "You must open VS Code on a workspace folder to do this."
+              "You must open VS Code on a workspace folder to do this.",
             )
             return
           }
@@ -588,14 +651,14 @@ export const openMenuCommand = (state: State) =>
           installRojo(folder)
             .then(() => {
               vscode.window.showInformationMessage(
-                "Successfully installed Rojo with Aftman! Atlas is ready to use."
+                "Successfully installed Rojo with Aftman! Atlas is ready to use.",
               )
 
               vscode.commands.executeCommand("vscode-atlas.openMenu")
             })
             .catch((e) => {
               vscode.window.showErrorMessage(
-                `Couldn't install Rojo with Aftman: ${e}`
+                `Couldn't install Rojo with Aftman: ${e}`,
               )
             })
 
