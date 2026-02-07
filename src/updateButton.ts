@@ -5,7 +5,7 @@ export function updateButton(state: State) {
   const numRunning = Object.keys(state.running).length
 
   if (numRunning === 0) {
-    state.resumeButton.command = "vscode-rojo.serveRecent"
+    state.resumeButton.command = "vscode-atlas.serveRecent"
     state.resumeButton.text = "$(testing-run-all-icon)"
     state.resumeButton.tooltip = "Serve most recent project file"
     return
@@ -18,5 +18,5 @@ export function updateButton(state: State) {
   }
 
   state.resumeButton.tooltip = "Stop all serving projects"
-  state.resumeButton.command = "vscode-rojo.stopAll"
+  state.resumeButton.command = "vscode-atlas.stopAll"
 }

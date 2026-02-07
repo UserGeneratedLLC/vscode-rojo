@@ -23,7 +23,7 @@ export interface RojoConfiguration {
  * @returns The current Rojo configuration
  */
 function getRojoConfiguration(): vscode.WorkspaceConfiguration {
-  return vscode.workspace.getConfiguration("rojo")
+  return vscode.workspace.getConfiguration("atlas")
 }
 
 /**

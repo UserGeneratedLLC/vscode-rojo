@@ -46,14 +46,17 @@ function getClassNames(APIDump) {
 	return services
 }
 
-async function generateSchema() {
+async function generateSchemas() {
 	const dump = await getAPIDump()
-
-	const currentProjectSchema = JSON.parse((await readFile("schemas/project.template.schema.json")).toString())
-
-	const servicesRoot = currentProjectSchema.properties.tree.then.allOf[1].properties
+	const classesEnum = getClassNames(dump)
 	const services = getServiceNames(dump)
 
+	await mkdir("dist", { recursive: true })
+
+	// --- Project schema ---
+	const projectSchema = JSON.parse((await readFile("schemas/project.template.schema.json")).toString())
+
+	const servicesRoot = projectSchema.properties.tree.then.allOf[1].properties
 	for (const service of services) {
 		if (!servicesRoot[service]) {
 			servicesRoot[service] = {
@@ -62,23 +65,42 @@ async function generateSchema() {
 		}
 	}
 
-	const classesAnyOf = currentProjectSchema["$defs"].tree.properties["$className"].anyOf
-	const classesEnum = getClassNames(dump)
-
+	const classesAnyOf = projectSchema["$defs"].tree.properties["$className"].anyOf
 	classesAnyOf.push({
 		"enum": classesEnum,
 	})
 
-	const newProjectSchema = JSON.stringify(currentProjectSchema)
-	await mkdir("dist", { recursive: true })
-	await writeFile("dist/project.schema.json", newProjectSchema)
+	await writeFile("dist/project.schema.json", JSON.stringify(projectSchema))
+
+	// --- Meta schema ---
+	const metaSchema = JSON.parse((await readFile("schemas/meta.template.schema.json")).toString())
+
+	// Inject class names into className field
+	metaSchema.properties.className.enum = classesEnum
+
+	await writeFile("dist/meta.schema.json", JSON.stringify(metaSchema))
+
+	// --- Model schema ---
+	const modelSchema = JSON.parse((await readFile("schemas/model.template.schema.json")).toString())
+
+	// Inject class names into root className and child className
+	const modelClassAnyOf = modelSchema.properties.className.anyOf
+	modelClassAnyOf.push({
+		"enum": classesEnum,
+	})
+
+	const childClassAnyOf = modelSchema["$defs"].modelChild.properties.className.anyOf
+	childClassAnyOf.push({
+		"enum": classesEnum,
+	})
+
+	await writeFile("dist/model.schema.json", JSON.stringify(modelSchema))
 }
 
 module.exports = class GenerateSchemaPlugin {
 	apply(compiler) {
-		// Generate the schema by reading the template, adding dynamic content, and writing to the main file location
 		compiler.hooks.compile.tap("GenerateSchema", async () => {
-			generateSchema()
+			generateSchemas()
 		})
 	}
 }

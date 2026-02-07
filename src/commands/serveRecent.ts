@@ -5,7 +5,7 @@ import { getRojoInstall } from "../getRojoInstall"
 import { serveProject } from "../serveProject"
 
 export const serveRecentCommand = (state: State) =>
-  vscode.commands.registerCommand("vscode-rojo.serveRecent", async () => {
+  vscode.commands.registerCommand("vscode-atlas.serveRecent", async () => {
     const lastFilePath: string | undefined =
       state.context.workspaceState.get("rojoLastPath")
 
@@ -36,5 +36,5 @@ export const serveRecentCommand = (state: State) =>
       }
     }
 
-    vscode.commands.executeCommand("vscode-rojo.openMenu")
+    vscode.commands.executeCommand("vscode-atlas.openMenu")
   })

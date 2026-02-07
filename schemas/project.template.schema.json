@@ -1,48 +1,72 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "required": ["name", "tree"],
+  "required": ["tree"],
   "type": "object",
+  "additionalProperties": false,
   "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "A URL to the JSON schema for this file."
+    },
     "name": {
       "type": "string",
-      "title": "Project name",
+      "description": "The name of the top-level instance described by the project. If omitted for a default.project.json5, the parent folder name is used.",
       "examples": ["your-project-name"]
     },
     "servePort": {
       "type": "integer",
-      "title": "Serve port",
-      "description": "The port number Rojo will use to communicate with Roblox Studio. This must be unique if you're running more than one instance of Rojo."
+      "description": "The port that `rojo serve` will use for live sync. Must be unique if running multiple Rojo instances."
     },
     "servePlaceIds": {
       "type": "array",
-      "title": "Serve place IDs",
-      "description": "The set of place IDs that this project is compatible with when doing live sync. This setting is intended to help prevent syncing a Rojo project into the wrong Roblox place.",
+      "description": "Place IDs this project is compatible with during live sync. Prevents syncing into the wrong Roblox place.",
       "items": {
-        "type": "number"
+        "type": "integer"
+      }
+    },
+    "blockedPlaceIds": {
+      "type": "array",
+      "description": "Place IDs this project is NOT compatible with during live sync. Prevents syncing into the wrong Roblox place.",
+      "items": {
+        "type": "integer"
       }
     },
     "placeId": {
       "type": "integer",
-      "title": "Place ID",
       "description": "Sets the current place's place ID when connecting to the Rojo server from Roblox Studio."
     },
     "gameId": {
       "type": "integer",
-      "title": "Game ID",
       "description": "Sets the current place's game ID when connecting to the Rojo server from Roblox Studio."
     },
     "serveAddress": {
       "type": "string",
-      "title": "Serve address",
-      "description": "This address will be used in place of the default address, as long as --address is unprovided."
+      "description": "Override the default serve address, as long as --address is not provided on the command line."
     },
     "globIgnorePaths": {
       "type": "array",
-      "title": "Glob ignore paths",
-      "description": "A list of globs, relative to the folder the project file is in, that match files that should be ignored if Rojo encounters them.",
+      "description": "Glob patterns, relative to the project file, matching files that should be excluded from the project.",
       "items": {
         "type": "string"
       }
+    },
+    "syncbackRules": {
+      "$ref": "#/$defs/syncbackRules"
+    },
+    "syncRules": {
+      "type": "array",
+      "description": "Custom rules mapping file glob patterns to middleware. Globs are relative to the project file.",
+      "items": {
+        "$ref": "#/$defs/syncRule"
+      }
+    },
+    "syncScriptsOnly": {
+      "type": "boolean",
+      "description": "When true, only script instances (Script, LocalScript, ModuleScript) are synced. All other instances are ignored, letting Studio maintain its own non-script content. Defaults to false."
+    },
+    "ignoreHiddenServices": {
+      "type": "boolean",
+      "description": "When true, hidden/internal services (AdService, Chat, HttpService, etc.) are ignored during sync. Only visible services like Workspace, ReplicatedStorage, ServerScriptService are synced. Defaults to true."
     },
     "tree": {
       "if": {
@@ -101,16 +125,23 @@
       "type": "object",
       "properties": {
         "$className": {
+          "description": "The ClassName of this instance. Must be set if $path is not set. Cannot be set if $path points to an instance with a ClassName other than Folder.",
           "anyOf": [
             {
               "type": "string"
             }
           ]
         },
+        "$id": {
+          "type": "string",
+          "description": "A unique ID for this instance, used to link referent properties (e.g. Model.PrimaryPart) across the project."
+        },
         "$ignoreUnknownInstances": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Controls behavior for instances in Studio not present in the project. If true, unknown instances are left alone. If false, they are destroyed. Defaults to true when $path is not set, false when $path is set."
         },
         "$path": {
+          "description": "A filesystem path this instance should be loaded from. Supports .luau, .rbxm, .rbxmx, .csv, and other Rojo-supported file types.",
           "oneOf": [
             {
               "type": "string"
@@ -119,19 +150,26 @@
               "type": "object",
               "properties": {
                 "optional": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "An optional path. If the file does not exist, the instance is still created (as a Folder by default)."
                 }
               },
-              "required": ["optional"]
+              "required": ["optional"],
+              "additionalProperties": false
             }
           ]
         },
         "$properties": {
           "type": "object",
+          "description": "Properties to assign to this instance. Keys are property names, values are property values (type is inferred from the class).",
           "properties": {
             "Name": false,
             "Parent": false
           }
+        },
+        "$attributes": {
+          "type": "object",
+          "description": "Attributes to assign to this instance. Keys are attribute names, values must be unambiguous (e.g. {\"Type\": \"String\", \"Value\": \"hello\"})."
         }
       }
     },
@@ -170,6 +208,106 @@
           }
         }
       ]
+    },
+    "syncbackRules": {
+      "type": "object",
+      "description": "Configuration for syncback (Roblox -> filesystem) operations.",
+      "additionalProperties": false,
+      "properties": {
+        "ignoreTrees": {
+          "type": "array",
+          "description": "Roblox instance tree paths to ignore during syncback (e.g. \"ServerStorage/Secrets\").",
+          "items": { "type": "string" }
+        },
+        "ignorePaths": {
+          "type": "array",
+          "description": "Glob patterns matched against filesystem paths. Matching instances won't be syncbacked.",
+          "items": { "type": "string" }
+        },
+        "ignoreProperties": {
+          "type": "object",
+          "description": "A map of class names to arrays of property names to ignore during syncback.",
+          "additionalProperties": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "ignoreClasses": {
+          "type": "array",
+          "description": "Class names to ignore entirely during syncback. Instances of these classes won't be added, removed, or synced.",
+          "items": { "type": "string" }
+        },
+        "syncCurrentCamera": {
+          "type": "boolean",
+          "description": "Whether Workspace.CurrentCamera is included in syncback. Defaults to false."
+        },
+        "syncUnscriptable": {
+          "type": "boolean",
+          "description": "Whether to sync properties that cannot be modified via scripts. Defaults to true."
+        },
+        "ignoreReferents": {
+          "type": "boolean",
+          "description": "Whether to skip serializing referent properties (like Model.PrimaryPart) during syncback. Defaults to false."
+        },
+        "createIgnoreDirPaths": {
+          "type": "boolean",
+          "description": "Whether ignorePaths globs ending in /** also match the directory itself. Generally better UX. Defaults to true."
+        },
+        "encodeWindowsInvalidChars": {
+          "type": "boolean",
+          "description": "Whether to encode Windows-invalid characters (<, >, :, etc.) in file names as %LT%, %GT%, %COLON%, etc. Defaults to true."
+        },
+        "ignoreHiddenServices": {
+          "type": "boolean",
+          "description": "Whether to ignore hidden/internal services (Chat, HttpService, etc.) during syncback. Only visible services are synced. Defaults to true."
+        },
+        "warnDuplicateNames": {
+          "type": "boolean",
+          "description": "Whether to emit warnings for duplicate child names (case-insensitive) during syncback. Duplicates are skipped. Defaults to false."
+        }
+      }
+    },
+    "syncRule": {
+      "type": "object",
+      "description": "A custom rule that maps matching files to a specific middleware.",
+      "required": ["pattern", "use"],
+      "additionalProperties": false,
+      "properties": {
+        "pattern": {
+          "type": "string",
+          "description": "A glob pattern to match files against, relative to the project file."
+        },
+        "exclude": {
+          "type": "string",
+          "description": "An optional glob pattern. Files matching this are excluded from the rule."
+        },
+        "use": {
+          "type": "string",
+          "description": "The middleware to use for matched files.",
+          "enum": [
+            "csv",
+            "jsonModel",
+            "json",
+            "serverScript",
+            "clientScript",
+            "moduleScript",
+            "pluginScript",
+            "localScript",
+            "legacyScript",
+            "project",
+            "rbxm",
+            "rbxmx",
+            "toml",
+            "text",
+            "yaml",
+            "ignore"
+          ]
+        },
+        "suffix": {
+          "type": "string",
+          "description": "A suffix (including extension) to trim from file names. If not specified, only the file extension is removed."
+        }
+      }
     }
   }
 }

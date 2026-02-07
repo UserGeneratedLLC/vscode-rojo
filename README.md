@@ -1,17 +1,21 @@
-# Rojo for VS Code
+# Atlas for VS Code
 
-Integrates [Rojo](https://github.com/rojo-rbx/rojo) natively with VS Code.
+Integrates [Rojo](https://github.com/UserGeneratedLLC/rojo) natively with VS Code, with full support for `.project.json5`, `.meta.json5`, and `.model.json5` files.
 
-![Rojo menu](https://i.eryn.io/2222/chrome-DdVyGHdh.png)
+All actions are performed via the Atlas menu. To open the Atlas menu, either:
 
-All actions are performed via the Rojo menu, as seen above. To open the Rojo menu, either:
+- Open the Command Palette (`Ctrl` + `Shift` + `P`) and type "Atlas: Open menu"
+- Use the Atlas button in the bottom right corner
 
-- Open the Command Pallette (`Ctrl` + `Shift` + `P`) and type "Rojo: Open menu"
-- Use the Rojo button in the bottom right corner:
+> Note: The Atlas button only appears if a folder in your workspace contains a `*.project.json5` or `*.project.json` file.
 
-![Rojo button](https://i.eryn.io/2222/dHvsUY6w.png)
+## Bundled Extensions
 
-> Note: The Rojo button only appears if a folder in your workspace contains a `*.project.json` file.
+Atlas includes these recommended extensions as part of its extension pack:
+
+- **[Better JSON5](https://marketplace.visualstudio.com/items?itemName=BlueGlassBlock.better-json5)** -- JSON5 syntax highlighting, IntelliSense, and schema validation
+- **[Luau Language Server](https://marketplace.visualstudio.com/items?itemName=JohnnyMorganz.luau-lsp)** -- Full Luau language support with autocomplete, diagnostics, and type checking
+- **[StyLua](https://marketplace.visualstudio.com/items?itemName=JohnnyMorganz.stylua)** -- Luau/Lua code formatter
 
 ## Automatic installation
 
@@ -21,43 +25,22 @@ You must click "Install Roblox Studio plugin" at least once if you want to live-
 
 ## System rojo
 
-This extension uses the `rojo.exe` from your system path. If you already installed Rojo manually to use it from the command line, or with another toolchain manager, this extension will use that version of Rojo automatically. However, we recommend upgrading to Aftman-managed Rojo for the best experience.
+This extension uses the `rojo.exe` from your system path. If you already installed Rojo manually to use it from the command line, or with another toolchain manager, this extension will use that version of Rojo automatically.
 
-### Foreman
+## JSON5 Support
 
-If you are already using Foreman to manage your system Rojo, we recommend switching to Aftman. Aftman is a more robust, spiritual successor to Foreman, created by the same original author. (Who is also the creator of Rojo! 🙂)
+Atlas fully supports `.json5` project files, meta files, and model files:
 
-If you want to learn more, see the [Differences from Foreman](https://github.com/LPGhatguy/aftman#differences-from-foreman) section of the Aftman README.
+- `*.project.json5` -- Project configuration (preferred over `.project.json`)
+- `*.meta.json5` -- Instance metadata (adjacent or `init.meta.json5`)
+- `*.model.json5` -- JSON model instances
 
-> **_Warning_: Stopping Rojo does not work with Foreman**
->
-> All currently-released versions of Foreman (as of v1.0.4) have a bug that makes killing the launched Rojo process leave a Rojo process running forever. There is [an open issue on the Foreman repo](https://github.com/Roblox/foreman/issues/45) for this problem, but for now you must either not use Rojo managed with Foreman, or kill the process yourself. Aftman does not have this problem.
+All file types have full JSON schema validation and IntelliSense via the bundled Better JSON5 extension.
 
-### Migrating from a globally-installed or Foreman-managed Rojo
-
-When you open the extension for the first time, if you are not using Aftman, a message will appear in the bottom-right. If you click "Switch to Aftman" on that message, your old `rojo.exe` will automatically be removed from your system PATH, and you will see another prompt that will install Aftman and Rojo for you.
-
-## Coming from V1 of this extension
-
-The release of V2 of this extension has changed how it works drastically, both internally and how you interact with it. However, we hope that these changes do not negatively affect your workflow.
-
-- All sub-commands have been removed in favor of a single menu.
-- The extension no longer uses its own bespoke installation of Rojo. It shares whatever version of Rojo you have installed on your system.
-- When the extension installs Rojo for you, it is installed in a way so that you can use it from the command line.
-- Versions of Rojo before Rojo 6 are no longer supported.
-- The extension will not automatically update Rojo for you. When Rojo is installed via Aftman, you can change your installed Rojo version by editing the `aftman.toml` file in your project.
-
-If something about this new extension breaks your workflow, please tell us about it!
-
-- Join the [Roblox Open Source Discord Server](https://discord.gg/wH5ncNS)
-- [Open an issue](https://github.com/rojo-rbx/vscode-rojo/issues) on the project repo
-
-You can always temporarily revert to V1 by [clicking the cog on the extension page and choosing "Install another version"](https://i.eryn.io/2222/2q0w1H3I.png).
-
-## Help me!
+## Help
 
 - Read the [Rojo docs](https://rojo.space/docs/v7/)
-- Join the [Roblox Open Source Discord Server](https://discord.gg/wH5ncNS)
+- [Open an issue](https://github.com/UserGeneratedLLC/vscode-rojo/issues) on the project repo
 
 ## Supported platforms
 
@@ -67,4 +50,4 @@ You can always temporarily revert to V1 by [clicking the cog on the extension pa
 
 ## License
 
-Rojo for VS Code is available under the terms of The Mozilla Public License Version 2. See [LICENSE](LICENSE) for details.
+Atlas for VS Code is available under the terms of The Mozilla Public License Version 2. See [LICENSE](LICENSE) for details.

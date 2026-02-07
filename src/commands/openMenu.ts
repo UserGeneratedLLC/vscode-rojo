@@ -38,9 +38,9 @@ const buildButton = {
 
 const rojoNotInstalled = [
   {
-    label: "$(rocket) Rojo",
+    label: "$(rocket) Atlas",
     description: "Not installed",
-    detail: "Rojo is not installed in this project\n",
+    detail: "Atlas is not installed in this project\n",
     info: true,
   },
   {
@@ -51,7 +51,7 @@ const rojoNotInstalled = [
   },
   {
     label: "$(desktop-download) Install Rojo now",
-    detail: "Click here to download and install Rojo.",
+    detail: "Click here to download and install Rojo (the underlying tool).",
     action: "install",
   },
 ]
@@ -74,18 +74,19 @@ function getInstallDetail(
   mixed: boolean
 ) {
   if (!installType) {
-    return "Rojo is not installed."
+    return "Rojo is not installed. Atlas requires Rojo to function."
   }
 
   if (mixed) {
     return "Rojo install method differs by project file."
+
   }
 
   if (installType === InstallType.global) {
     return "Rojo is globally installed."
   }
 
-  return `Rojo is managed by ${installType}.`
+  return `Rojo is managed by ${installType}`
 }
 
 let aftmanMessageSent = false
@@ -148,7 +149,7 @@ function showSwitchMessage(install: RojoInstall) {
           })
           .then(
             () => {
-              vscode.commands.executeCommand("vscode-rojo.openMenu")
+              vscode.commands.executeCommand("vscode-atlas.openMenu")
             },
             (e) => {
               vscode.window.showErrorMessage(
@@ -289,6 +290,7 @@ async function generateProjectMenu(
     if (!isInstalled) {
       detailParts.push(
         `        Rojo not detected in ${getWorkspaceFolderName(projectFile)}`
+
       )
     } else if (allRojoVersions.length > 1) {
       detailParts.push(`v${projectFileRojoVersions.get(projectFile)}`)
@@ -336,7 +338,7 @@ async function generateProjectMenu(
 
   return [
     {
-      label: "$(rocket) Rojo",
+      label: "$(rocket) Atlas",
       description:
         allRojoVersions.length === 1
           ? `v${allRojoVersions[0]}`
@@ -352,7 +354,7 @@ async function generateProjectMenu(
       projectFile: projectFiles[0],
     },
     {
-      label: "$(link-external) Open Rojo Docs",
+      label: "$(link-external) Open Rojo Docs (rojo.space)",
       info: true,
       action: "openDocs",
     },
@@ -374,7 +376,7 @@ async function generateProjectMenu(
 }
 
 export const openMenuCommand = (state: State) =>
-  vscode.commands.registerCommand("vscode-rojo.openMenu", async () => {
+  vscode.commands.registerCommand("vscode-atlas.openMenu", async () => {
     const projectFilesResult = await result(findProjectFiles())
 
     if (!projectFilesResult.ok) {
@@ -399,9 +401,9 @@ export const openMenuCommand = (state: State) =>
       const firstFolder = vscode.workspace.workspaceFolders[0]
 
       const defaultProjectFile: ProjectFile = {
-        name: "default.project.json",
+        name: "default.project.json5",
         workspaceFolderName: firstFolder.name,
-        path: vscode.Uri.joinPath(firstFolder.uri, "default.project.json"),
+        path: vscode.Uri.joinPath(firstFolder.uri, "default.project.json5"),
       }
 
       const installResult = await result<RojoInstall | null, string>(
@@ -414,7 +416,7 @@ export const openMenuCommand = (state: State) =>
         if (install) {
           pickItems = [
             {
-              label: "$(rocket) Rojo",
+              label: "$(rocket) Atlas",
               detail: "This workspace contains no project files.",
               info: true,
             },
@@ -438,7 +440,7 @@ export const openMenuCommand = (state: State) =>
     }
 
     input.items = pickItems
-    input.title = "Rojo"
+    input.title = "Atlas"
 
     input.onDidTriggerItemButton(async (event) => {
       const item = event.item as PickItem
@@ -458,7 +460,7 @@ export const openMenuCommand = (state: State) =>
             await buildProject(item.projectFile)
           } catch (e) {
             vscode.window.showErrorMessage(
-              "Rojo build errored: " + (e as any).toString()
+              "Atlas build errored: " + (e as any).toString()
             )
           }
           break
@@ -472,7 +474,7 @@ export const openMenuCommand = (state: State) =>
             serveProject(state, item.projectFile)
           } catch (e) {
             vscode.window.showErrorMessage(
-              "Rojo: Something went wrong when starting rojo. Error: " +
+              "Atlas: Something went wrong when starting Rojo. Error: " +
                 (e as any).toString()
             )
           }
@@ -501,7 +503,7 @@ export const openMenuCommand = (state: State) =>
             serveProject(state, selectedItem.projectFile!)
           } catch (e) {
             vscode.window.showErrorMessage(
-              "Rojo: Something went wrong when starting rojo. Error: " +
+              "Atlas: Something went wrong when starting Rojo. Error: " +
                 (e as any).toString()
             )
           }
@@ -517,7 +519,7 @@ export const openMenuCommand = (state: State) =>
               running.stop()
             } catch (e) {
               vscode.window.showErrorMessage(
-                "Rojo: Couldn't stop Rojo process. Error: " +
+                "Atlas: Couldn't stop Rojo process. Error: " +
                   (e as any).toString()
               )
             }
@@ -546,7 +548,7 @@ export const openMenuCommand = (state: State) =>
           createProjectFile(folder)
             .then(() => {
               input.hide()
-              vscode.commands.executeCommand("vscode-rojo.openMenu")
+              vscode.commands.executeCommand("vscode-atlas.openMenu")
             })
             .catch((e) => {
               vscode.window.showErrorMessage(
@@ -586,10 +588,10 @@ export const openMenuCommand = (state: State) =>
           installRojo(folder)
             .then(() => {
               vscode.window.showInformationMessage(
-                "Successfully installed Rojo with Aftman!"
+                "Successfully installed Rojo with Aftman! Atlas is ready to use."
               )
 
-              vscode.commands.executeCommand("vscode-rojo.openMenu")
+              vscode.commands.executeCommand("vscode-atlas.openMenu")
             })
             .catch((e) => {
               vscode.window.showErrorMessage(

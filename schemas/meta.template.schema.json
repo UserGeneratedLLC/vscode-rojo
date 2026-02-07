@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Metadata file for Rojo instances. Adjacent meta files (e.g. MyScript.meta.json5) apply to the sibling file. Directory meta files (init.meta.json5) apply to the containing folder's instance.",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "A URL to the JSON schema for this file."
+    },
+    "id": {
+      "type": "string",
+      "description": "A unique ID for this instance, used to link referent properties (e.g. Model.PrimaryPart) across the project."
+    },
+    "ignoreUnknownInstances": {
+      "type": "boolean",
+      "description": "If true, instances in Studio not present in the source are left alone during live sync. If false, they are destroyed."
+    },
+    "className": {
+      "type": "string",
+      "description": "Override the ClassName of the instance. Only valid in init.meta.json5 files, and only when the directory would otherwise become a Folder."
+    },
+    "properties": {
+      "type": "object",
+      "description": "Properties to assign to this instance. Keys are property names, values are property values (type is inferred from the class)."
+    },
+    "attributes": {
+      "type": "object",
+      "description": "Attributes to assign to this instance. Keys are attribute names, values must be unambiguous (e.g. {\"Type\": \"String\", \"Value\": \"hello\"})."
+    }
+  }
+}

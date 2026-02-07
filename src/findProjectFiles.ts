@@ -74,7 +74,7 @@ async function searchForProjectFiles(
     const fileNames = (await vscode.workspace.fs.readDirectory(searchUri))
       .filter(([, fileType]) => fileType === vscode.FileType.File)
       .map(([fileName]) => fileName)
-      .filter((fileName) => fileName.endsWith(".project.json"))
+      .filter((fileName) => fileName.endsWith(".project.json5") || fileName.endsWith(".project.json"))
 
     for (const fileName of fileNames) {
       const filePath = vscode.Uri.joinPath(searchUri, fileName)

@@ -13,7 +13,20 @@ let cleanup: undefined | (() => void)
 let configurationDisposable: vscode.Disposable | undefined
 
 export function activate(context: vscode.ExtensionContext) {
-  console.log("vscode-rojo activated")
+  console.log("vscode-atlas activated")
+
+  // Check for conflicting original Rojo extension
+  const rojoExtension = vscode.extensions.getExtension("evaera.vscode-rojo")
+  if (rojoExtension) {
+    vscode.window.showWarningMessage(
+      "Atlas: The original Rojo extension (evaera.vscode-rojo) is installed and will conflict with Atlas. Please disable or uninstall it.",
+      "Open Extensions"
+    ).then((choice) => {
+      if (choice === "Open Extensions") {
+        vscode.commands.executeCommand("workbench.extensions.action.showInstalledExtensions")
+      }
+    })
+  }
 
   const state: State = {
     resumeButton: vscode.window.createStatusBarItem(
@@ -28,8 +41,8 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.StatusBarAlignment.Right,
     200
   )
-  button.command = "vscode-rojo.openMenu"
-  button.text = "$(rocket) Rojo"
+  button.command = "vscode-atlas.openMenu"
+  button.text = "$(rocket) Atlas"
   button.show()
 
   updateButton(state)
@@ -40,11 +53,11 @@ export function activate(context: vscode.ExtensionContext) {
   )
 
   configurationDisposable = vscode.workspace.onDidChangeConfiguration((event) => {
-    if (event.affectsConfiguration("rojo.additionalProjectPaths")) {
-      console.log("rojo.additionalProjectPaths configuration changed")
+    if (event.affectsConfiguration("atlas.additionalProjectPaths")) {
+      console.log("atlas.additionalProjectPaths configuration changed")
       
       vscode.window.showInformationMessage(
-        "Rojo: Additional project paths updated. New paths will be searched when opening the project menu.",
+        "Atlas: Additional project paths updated. New paths will be searched when opening the project menu.",
         { modal: false }
       )
     }
@@ -64,7 +77,7 @@ export function activate(context: vscode.ExtensionContext) {
   ) {
     vscode.window
       .showInformationMessage(
-        "The Rojo extension has received a major upgrade. We recommend reading the extension description page.",
+        "The Atlas extension has received a major upgrade. We recommend reading the extension description page.",
         "Open extension page",
         "Don't show this again"
       )
@@ -77,7 +90,7 @@ export function activate(context: vscode.ExtensionContext) {
           vscode.env.openExternal(
             vscode.Uri.from({
               scheme: vscode.env.uriScheme,
-              path: "extension/evaera.vscode-rojo",
+              path: "extension/UserGeneratedLLC.vscode-atlas",
             })
           )
         }

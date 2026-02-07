@@ -16,11 +16,11 @@ export async function installPlugin(projectFile: ProjectFile) {
 
   if (output.stderr.length > 0) {
     vscode.window.showErrorMessage(
-      "Rojo plugin install failed: " + output.stderr
+      "Atlas plugin install failed: " + output.stderr
     )
   } else {
     vscode.window.showInformationMessage(
-      "Rojo: " +
+      "Atlas: " +
         (output.stdout.length > 0
           ? output.stdout
           : "Roblox Studio plugin installed!")
