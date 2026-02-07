@@ -50,8 +50,8 @@ const rojoNotInstalled = [
     action: "openDiscord",
   },
   {
-    label: "$(desktop-download) Install Rojo now",
-    detail: "Click here to download and install Rojo (the underlying tool).",
+    label: "$(desktop-download) Install Atlas now",
+    detail: "Click here to download and install Atlas (the underlying tool).",
     action: "install",
   },
 ]
