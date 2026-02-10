@@ -155,7 +155,9 @@ export async function installRojo(folder: string) {
     if (file.bytesWritten === 0) {
       file.close()
 
-      return Promise.reject("Could not extract rokit executable from zip release!")
+      return Promise.reject(
+        "Could not extract rokit executable from zip release!",
+      )
     }
 
     await promisifyStream(file)
