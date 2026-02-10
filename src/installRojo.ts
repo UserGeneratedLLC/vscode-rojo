@@ -1,6 +1,5 @@
 import * as childProcess from "child_process"
 import * as fs from "fs"
-import { lstat } from "fs/promises"
 import fetch from "node-fetch"
 import * as os from "os"
 import * as path from "path"
@@ -60,10 +59,10 @@ export function promisifyStream(
   })
 }
 
-async function isAftmanInstalled() {
-  const aftmanPath = await which("aftman").catch(() => null)
+async function isRokitInstalled() {
+  const rokitPath = await which("rokit").catch(() => null)
 
-  return !!aftmanPath
+  return !!rokitPath
 }
 
 const nodePlatforms: { [index: string]: string | undefined } = {
@@ -77,7 +76,7 @@ const nodeArches: { [index: string]: string | undefined } = {
   x64: "x86_64",
 }
 
-// Release name example: "aftman-v0.2.2-windows-x86_64.zip",
+// Release name example: "rokit-0.2.0-windows-x86_64.zip",
 // Arch examples: x86_64, aarch64
 // Platforms: linux, macos, windows
 function findCompatibleAsset(assets: Asset[]): Asset | null {
@@ -108,10 +107,10 @@ function findCompatibleAsset(assets: Asset[]): Asset | null {
 }
 
 export async function installRojo(folder: string) {
-  if (!(await isAftmanInstalled())) {
-    console.log("Aftman not installed")
+  if (!(await isRokitInstalled())) {
+    console.log("Rokit not installed")
     const latestReleaseResponse = await fetch(
-      "https://latest-github-release.eryn.io/lpghatguy/aftman",
+      "https://latest-github-release.eryn.io/rojo-rbx/rokit",
     )
 
     if (!latestReleaseResponse.ok) {
@@ -122,14 +121,14 @@ export async function installRojo(folder: string) {
       (await latestReleaseResponse.json()) as any
 
     if (!latestRelease) {
-      return Promise.reject("Latest release of Aftman was not found")
+      return Promise.reject("Latest release of Rokit was not found")
     }
 
     const asset = findCompatibleAsset(latestRelease.assets)
 
     if (!asset) {
       return Promise.reject(
-        `We couldn't find a compatible Aftman release for your platform/architecture: ${os.arch()} ${os.platform()}`,
+        `We couldn't find a compatible Rokit release for your platform/architecture: ${os.arch()} ${os.platform()}`,
       )
     }
 
@@ -143,7 +142,7 @@ export async function installRojo(folder: string) {
 
     const tempPath = path.join(
       os.tmpdir(),
-      "aftman" + (os.platform() === "win32" ? ".exe" : ""),
+      "rokit" + (os.platform() === "win32" ? ".exe" : ""),
     )
     const writeStream = fs.createWriteStream(tempPath)
 
@@ -156,7 +155,7 @@ export async function installRojo(folder: string) {
     if (file.bytesWritten === 0) {
       file.close()
 
-      return Promise.reject("Could not extract aftman.exe from zip release!")
+      return Promise.reject("Could not extract rokit executable from zip release!")
     }
 
     await promisifyStream(file)
@@ -169,46 +168,16 @@ export async function installRojo(folder: string) {
     await exec(`"${tempPath}" self-install`)
 
     vscode.window.showInformationMessage(
-      "Successfully installed Aftman on your system. " +
-        "It has been added to your system PATH, and is usable from the command line if needed. ",
+      "Successfully installed Rokit on your system. " +
+        "It has been added to your system PATH, and is usable from the command line if needed.",
     )
 
     if ("PATH" in process.env) {
       const envPath = process.env.PATH!.split(path.delimiter)
-      envPath.push(path.join(os.homedir(), ".aftman", "bin"))
+      envPath.push(path.join(os.homedir(), ".rokit", "bin"))
       process.env.PATH = envPath.join(path.delimiter)
     }
   }
 
-  await exec("aftman trust UserGeneratedLLC/rojo", {
-    cwd: folder,
-  })
-
-  const aftmanToml = await lstat(path.join(folder, "aftman.toml")).catch(
-    () => null,
-  )
-
-  if (aftmanToml) {
-    await exec("aftman install", {
-      cwd: folder,
-    })
-
-    const output = await exec("rojo --version", {
-      cwd: folder,
-    }).catch(() => null)
-
-    if (!output) {
-      await exec("aftman add UserGeneratedLLC/rojo", {
-        cwd: folder,
-      })
-    }
-  } else {
-    await exec("aftman init", {
-      cwd: folder,
-    })
-
-    await exec("aftman add UserGeneratedLLC/rojo", {
-      cwd: folder,
-    })
-  }
+  await exec("rokit add --global UserGeneratedLLC/rojo atlas")
 }

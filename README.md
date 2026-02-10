@@ -1,6 +1,6 @@
 # Atlas for VS Code
 
-Integrates [Rojo](https://github.com/UserGeneratedLLC/rojo) natively with VS Code, with full support for `.project.json5`, `.meta.json5`, and `.model.json5` files.
+Integrates [Atlas](https://github.com/UserGeneratedLLC/rojo) natively with VS Code, with full support for `.project.json5`, `.meta.json5`, and `.model.json5` files.
 
 All actions are performed via the Atlas menu. To open the Atlas menu, either:
 
@@ -19,13 +19,13 @@ Atlas includes these recommended extensions as part of its extension pack:
 
 ## Automatic installation
 
-If you do not have Rojo installed, the extension will ask you if you want it to be automatically installed for you. If you do, it will be installed via [Aftman](https://github.com/LPGhatguy/aftman), a toolchain manager. This will create an `aftman.toml` file in your project directory, which will pin the current version of Rojo in your project.
+If you do not have Atlas installed, the extension will ask you if you want it to be automatically installed for you. If you do, it will be installed via [Rokit](https://github.com/rojo-rbx/rokit), a toolchain manager. This will create a `rokit.toml` file in your project directory, which will pin the current version of Atlas in your project.
 
 You must click "Install Roblox Studio plugin" at least once if you want to live-sync from Studio!
 
-## System rojo
+## System Atlas
 
-This extension uses the `rojo.exe` from your system path. If you already installed Rojo manually to use it from the command line, or with another toolchain manager, this extension will use that version of Rojo automatically.
+This extension uses the `atlas.exe` from your system path. If you already installed Atlas manually to use it from the command line, or with another toolchain manager, this extension will use that version of Atlas automatically.
 
 ## JSON5 Support
 
@@ -39,7 +39,7 @@ All file types have full JSON schema validation and IntelliSense via the bundled
 
 ## Help
 
-- Read the [Rojo docs](https://rojo.space/docs/v7/)
+- Read the [Atlas docs](https://rojo.space/docs/v7/)
 - [Open an issue](https://github.com/UserGeneratedLLC/vscode-rojo/issues) on the project repo
 
 ## Supported platforms

@@ -13,9 +13,12 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - `rojo.showFullPaths` setting to show full path display for projects in the
   project selection menu
 
+### Changed
+- Replaced Aftman with Rokit as the recommended toolchain manager
+- Users not using Rokit-managed tools are now alerted with a suggestion to switch
+
 ### Fixed
 - Webpack build failure with dist directory creation
-- Tool detection to avoid suggesting Aftman when Rokit is installed
 
 ## [2.1.2] - 2022-08-25
 ### Fixed

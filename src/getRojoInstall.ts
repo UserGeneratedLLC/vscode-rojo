@@ -9,8 +9,6 @@ const exec = promisify(childProcess.exec)
 
 export enum InstallType {
   rokit = "Rokit",
-  aftman = "Aftman",
-  foreman = "Foreman",
   global = "global",
 }
 export type RojoInstall = {
@@ -28,10 +26,6 @@ type ExecError = {
 function getInstallType(resolvedPath: string) {
   if (resolvedPath.includes(".rokit")) {
     return InstallType.rokit
-  } else if (resolvedPath.includes(".aftman")) {
-    return InstallType.aftman
-  } else if (resolvedPath.includes(".foreman")) {
-    return InstallType.foreman
   }
 
   return InstallType.global
@@ -61,13 +55,6 @@ export async function getRojoInstall(
   if (outputResult.ok) {
     const output = outputResult.result
 
-    if (output.stderr.length > 0) {
-      // foreman version prior to 1.0.4 don't correctly set status code
-      if (output.stderr.includes("Foreman")) {
-        return Promise.reject(output.stderr)
-      }
-    }
-
     const split = output.stdout.split(" ")
 
     const version = split[1]
@@ -82,10 +69,7 @@ export async function getRojoInstall(
       resolvedPath,
     }
   } else {
-    if (
-      outputResult.error.stderr.includes("aftman") ||
-      outputResult.error.stderr.includes("rokit")
-    ) {
+    if (outputResult.error.stderr.includes("rokit")) {
       return null
     }
 

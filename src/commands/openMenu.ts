@@ -88,41 +88,23 @@ function getInstallDetail(
   return `Atlas is managed by ${installType}`
 }
 
-let aftmanMessageSent = false
+let rokitMessageSent = false
 
 function showSwitchMessage(install: RojoInstall) {
   const installType = install.installType
 
-  // Tell the user about Aftman once per session
-  if (
-    !(
-      installType === InstallType.aftman || installType === InstallType.rokit
-    ) &&
-    !aftmanMessageSent
-  ) {
-    aftmanMessageSent = true
-
-    let details = ""
-
-    if (installType === InstallType.global) {
-      details =
-        " Aftman is a toolchain manager. " +
-        "It enables installing project-specific command line tools and switching between them seamlessly."
-    } else if (installType === InstallType.foreman) {
-      details =
-        " Aftman is similar to Foreman, but is more robust and easier to use. " +
-        "Additionally, all currently-released versions of Foreman (as of v1.0.4) " +
-        "have a bug that makes killing the launched Rojo process leave a Rojo process running forever."
-    }
+  // Tell the user about Rokit once per session
+  if (installType !== InstallType.rokit && !rokitMessageSent) {
+    rokitMessageSent = true
 
     vscode.window
       .showInformationMessage(
         `${getInstallDetail(
           installType,
           false,
-        )} You should consider using Aftman instead to manage your tool chains.` +
-          details,
-        "Switch to Aftman",
+        )} You should consider using Rokit instead to manage your toolchains.` +
+          " Rokit is a toolchain manager that enables installing project-specific command line tools and switching between them seamlessly.",
+        "Switch to Rokit",
       )
       .then((response) => {
         if (!response) {
@@ -131,8 +113,8 @@ function showSwitchMessage(install: RojoInstall) {
 
         vscode.window
           .showWarningMessage(
-            `This will delete the atlas.exe in your path from ${install.resolvedPath}.` +
-              ` After that, we will prompt you to install Atlas with Aftman. Is this OK?`,
+            `This will delete the atlas executable in your path from ${install.resolvedPath}.` +
+              ` After that, we will prompt you to install Atlas with Rokit. Is this OK?`,
             "Yes",
             "No",
           )
@@ -142,7 +124,7 @@ function showSwitchMessage(install: RojoInstall) {
             }
 
             // User might have multiple rojo's in their path, reset this to allow showing the message again
-            aftmanMessageSent = false
+            rokitMessageSent = false
 
             return fs.unlink(install.resolvedPath)
           })
@@ -169,14 +151,6 @@ async function handleInstallError(error: string) {
     } resulted in an error: (${error}).` +
       `Fix or delete this file manually and try again.`,
   )
-
-  if (error.includes("Foreman") && location) {
-    // showSwitchMessage({
-    //   installType: InstallType.foreman,
-    //   resolvedPath: location,
-    //   version: "?",
-    // })
-  }
 }
 
 async function generateProjectMenu(
@@ -209,7 +183,7 @@ async function generateProjectMenu(
           mixed = true
         }
 
-        // showSwitchMessage(install)
+        showSwitchMessage(install)
       }
 
       projectFileRojoVersions.set(projectFile, install ? install.version : null)
@@ -654,14 +628,14 @@ export const openMenuCommand = (state: State) =>
           installRojo(folder)
             .then(() => {
               vscode.window.showInformationMessage(
-                "Successfully installed Rojo with Aftman! Atlas is ready to use.",
+                "Successfully installed Rojo with Rokit! Atlas is ready to use.",
               )
 
               vscode.commands.executeCommand("vscode-atlas.openMenu")
             })
             .catch((e) => {
               vscode.window.showErrorMessage(
-                `Couldn't install Rojo with Aftman: ${e}`,
+                `Couldn't install Rojo with Rokit: ${e}`,
               )
             })
 
