@@ -253,10 +253,6 @@
           "type": "boolean",
           "description": "Whether ignorePaths globs ending in /** also match the directory itself. Generally better UX. Defaults to true."
         },
-        "encodeWindowsInvalidChars": {
-          "type": "boolean",
-          "description": "Whether to encode Windows-invalid characters (<, >, :, etc.) in file names as %LT%, %GT%, %COLON%, etc. Defaults to true."
-        },
         "ignoreHiddenServices": {
           "type": "boolean",
           "description": "Whether to ignore hidden/internal services (Chat, HttpService, etc.) during syncback. Only visible services are synced. Defaults to true."
