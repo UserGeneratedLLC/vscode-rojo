@@ -1,6 +1,10 @@
+import * as childProcess from "child_process"
 import * as fs from "fs/promises"
 import * as path from "path"
+import { promisify } from "util"
 import * as vscode from "vscode"
+
+const exec = promisify(childProcess.exec)
 import { buildProject } from "../buildProject"
 import { createProjectFile } from "../createProjectFile"
 import { State } from "../extension"
@@ -462,7 +466,7 @@ export const openMenuCommand = (state: State) =>
       }
     })
 
-    input.onDidAccept(() => {
+    input.onDidAccept(async () => {
       const selectedItem = input.activeItems[0] as PickItem
 
       switch (selectedItem.action) {
@@ -597,14 +601,29 @@ export const openMenuCommand = (state: State) =>
             selectedItem.projectFile.path.fsPath,
           )
 
-          const sourcemapTerminal = vscode.window.createTerminal({
-            name: `Atlas: atlas sourcemap`,
-            cwd: sourcemapFolder,
-          })
-          sourcemapTerminal.show()
-          sourcemapTerminal.sendText(`atlas sourcemap "${sourcemapFile}"`)
-
           input.hide()
+
+          try {
+            const output = await exec(
+              `atlas sourcemap "${sourcemapFile}" --output "sourcemap.json"`,
+              { cwd: sourcemapFolder },
+            )
+
+            if (output.stderr.length > 0) {
+              vscode.window.showErrorMessage(
+                "Atlas sourcemap failed: " + output.stderr,
+              )
+            } else {
+              vscode.window.showInformationMessage(
+                output.stdout || "Sourcemap generated at sourcemap.json",
+              )
+            }
+          } catch (e) {
+            vscode.window.showErrorMessage(
+              "Atlas sourcemap errored: " + (e as Error).toString(),
+            )
+          }
+
           break
         }
         case "install": {
