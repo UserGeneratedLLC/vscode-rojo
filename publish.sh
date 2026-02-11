@@ -34,7 +34,7 @@ if [ -z "${VSCE_PAT:-}" ]; then
     echo "Warning: VSCE_PAT not set, skipping VS Code Marketplace publish."
 else
     echo "Publishing to VS Code Marketplace..."
-    npx --yes @vscode/vsce publish --no-dependencies --pat "$VSCE_PAT"
+    npx --yes @vscode/vsce publish --packagePath "$vsix" --pat "$VSCE_PAT"
     echo "Published to VS Code Marketplace."
 fi
 

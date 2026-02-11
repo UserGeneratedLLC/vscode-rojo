@@ -35,7 +35,7 @@ if (-not $env:VSCE_PAT) {
     Write-Host "Warning: VSCE_PAT not set, skipping VS Code Marketplace publish." -ForegroundColor Yellow
 } else {
     Write-Host "Publishing to VS Code Marketplace..." -ForegroundColor Cyan
-    npx --yes @vscode/vsce publish --no-dependencies --pat $env:VSCE_PAT
+    npx --yes @vscode/vsce publish --packagePath $vsix.FullName --pat $env:VSCE_PAT
     Write-Host "Published to VS Code Marketplace." -ForegroundColor Green
 }
 
