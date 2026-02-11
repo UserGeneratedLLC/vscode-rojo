@@ -2,7 +2,7 @@
   "name": "vscode-roblox-atlas",
   "displayName": "Atlas - Connecting AI Agents to Roblox Studio",
   "description": "Atlas for VS Code",
-  "version": "2.1.2",
+  "version": "2.2.0",
   "repository": "https://github.com/UserGeneratedLLC/vscode-rojo",
   "publisher": "UserGeneratedLLC",
   "engines": {
@@ -48,15 +48,21 @@
     "configurationDefaults": {
       "json5.schemas": [
         {
-          "fileMatch": ["*.project.json5"],
+          "fileMatch": [
+            "*.project.json5"
+          ],
           "url": "./dist/project.schema.json"
         },
         {
-          "fileMatch": ["*.meta.json5"],
+          "fileMatch": [
+            "*.meta.json5"
+          ],
           "url": "./dist/meta.schema.json"
         },
         {
-          "fileMatch": ["*.model.json5"],
+          "fileMatch": [
+            "*.model.json5"
+          ],
           "url": "./dist/model.schema.json"
         }
       ]
