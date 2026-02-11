@@ -15,7 +15,8 @@
   "extensionPack": [
     "BlueGlassBlock.better-json5",
     "JohnnyMorganz.luau-lsp",
-    "JohnnyMorganz.stylua"
+    "JohnnyMorganz.stylua",
+    "Kampfkarren.selene-vscode"
   ],
   "activationEvents": [
     "onCommand:vscode-atlas.openMenu",
