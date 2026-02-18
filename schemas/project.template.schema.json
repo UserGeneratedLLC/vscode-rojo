@@ -243,7 +243,7 @@
         },
         "syncUnscriptable": {
           "type": "boolean",
-          "description": "Whether to sync properties that cannot be modified via scripts. Defaults to true."
+          "description": "Whether to sync properties that cannot be modified via scripts. Defaults to false."
         },
         "ignoreReferents": {
           "type": "boolean",
