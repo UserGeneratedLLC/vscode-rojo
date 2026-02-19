@@ -27,7 +27,7 @@ class ServeTerminal implements vscode.Pseudoterminal {
   ) {}
 
   open(): void {
-    this.process = cp.spawn("atlas", ["serve", this.projectFileName], {
+    this.process = cp.spawn("atlas", ["serve", "--color", "always", this.projectFileName], {
       cwd: this.cwd,
     })
 
