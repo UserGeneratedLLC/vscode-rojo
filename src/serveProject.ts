@@ -27,9 +27,13 @@ class ServeTerminal implements vscode.Pseudoterminal {
   ) {}
 
   open(): void {
-    this.process = cp.spawn("atlas", ["serve", "--color", "always", this.projectFileName], {
-      cwd: this.cwd,
-    })
+    this.process = cp.spawn(
+      "atlas",
+      ["serve", "--color", "always", this.projectFileName],
+      {
+        cwd: this.cwd,
+      },
+    )
 
     this.process.stdout?.on("data", (data: Buffer) => {
       this.writeEmitter.fire(data.toString().replace(/\r?\n/g, "\r\n"))
