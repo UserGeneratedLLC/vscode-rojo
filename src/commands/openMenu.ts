@@ -45,7 +45,7 @@ import { createProjectFile } from "../createProjectFile"
 import { State } from "../extension"
 import { findProjectFiles, ProjectFile } from "../findProjectFiles"
 import { getRojoInstall, InstallType, RojoInstall } from "../getRojoInstall"
-import { installPlugin } from "../installPlugin"
+import { installPlugin, isAtlasPluginInstalled } from "../installPlugin"
 import { installRojo } from "../installRojo"
 import { result } from "../result"
 import { serveProject } from "../serveProject"
@@ -733,14 +733,16 @@ export const openMenuCommand = (state: State) =>
                 }
               }
 
-              progress.report({ message: "Reinstalling Studio plugin..." })
-              try {
-                await exec("atlas plugin install")
-              } catch (e: any) {
-                vscode.window.showWarningMessage(
-                  `Atlas updated, but plugin reinstall failed: ${e.stderr || e}. ` +
-                    `Run "atlas plugin install" manually to avoid version mismatch.`,
-                )
+              if (isAtlasPluginInstalled()) {
+                progress.report({ message: "Reinstalling Studio plugin..." })
+                try {
+                  await exec("atlas plugin install")
+                } catch (e: any) {
+                  vscode.window.showWarningMessage(
+                    `Atlas updated, but plugin reinstall failed: ${e.stderr || e}. ` +
+                      `Run "atlas plugin install" manually to avoid version mismatch.`,
+                  )
+                }
               }
 
               vscode.window.showInformationMessage(

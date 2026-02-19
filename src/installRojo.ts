@@ -8,6 +8,7 @@ import { promisify } from "util"
 import { pipeline as pipelineCb } from "stream"
 import * as vscode from "vscode"
 import * as which from "which"
+import { isAtlasPluginInstalled } from "./installPlugin"
 
 const exec = promisify(childProcess.exec)
 const pipelineAsync = promisify(pipelineCb)
@@ -191,14 +192,16 @@ export async function installRojo(folder: string) {
       await exec("rokit trust UserGeneratedLLC/rojo")
       await exec("atlas --version")
 
-      progress.report({ message: "Installing Studio plugin..." })
-      try {
-        await exec("atlas plugin install")
-      } catch (e: any) {
-        vscode.window.showWarningMessage(
-          `Atlas installed successfully, but the Studio plugin could not be installed: ${e.stderr || e}. ` +
-            `You can install it later from the Atlas menu or by running "atlas plugin install".`,
-        )
+      if (isAtlasPluginInstalled()) {
+        progress.report({ message: "Installing Studio plugin..." })
+        try {
+          await exec("atlas plugin install")
+        } catch (e: any) {
+          vscode.window.showWarningMessage(
+            `Atlas installed successfully, but the Studio plugin could not be updated: ${e.stderr || e}. ` +
+              `You can update it from the Atlas menu or by running "atlas plugin install".`,
+          )
+        }
       }
     },
   )

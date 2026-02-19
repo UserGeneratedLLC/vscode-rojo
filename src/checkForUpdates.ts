@@ -2,6 +2,7 @@ import * as childProcess from "child_process"
 import { promisify } from "util"
 import * as vscode from "vscode"
 import * as which from "which"
+import { isAtlasPluginInstalled } from "./installPlugin"
 
 const exec = promisify(childProcess.exec)
 
@@ -80,14 +81,16 @@ export async function checkForAtlasUpdates(
         return
       }
 
-      progress.report({ message: "Reinstalling Studio plugin..." })
-      try {
-        await exec("atlas plugin install")
-      } catch {
-        vscode.window.showWarningMessage(
-          "Atlas updated, but Studio plugin reinstall failed. " +
-            'Run "atlas plugin install" manually.',
-        )
+      if (isAtlasPluginInstalled()) {
+        progress.report({ message: "Reinstalling Studio plugin..." })
+        try {
+          await exec("atlas plugin install")
+        } catch {
+          vscode.window.showWarningMessage(
+            "Atlas updated, but Studio plugin reinstall failed. " +
+              'Run "atlas plugin install" manually.',
+          )
+        }
       }
 
       vscode.window.showInformationMessage("Atlas updated successfully.")
