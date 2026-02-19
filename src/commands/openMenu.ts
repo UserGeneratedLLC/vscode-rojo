@@ -57,6 +57,62 @@ import {
 import { getConfigSetting, ThreeStateOption } from "../configuration"
 import which = require("which")
 
+function runAtlasCommand(
+  args: string[],
+  cwd: string,
+  terminalName: string,
+): { terminal: vscode.Terminal; exitCode: Promise<number | null> } {
+  const writeEmitter = new vscode.EventEmitter<string>()
+  const closeEmitter = new vscode.EventEmitter<number | void>()
+
+  let resolveExit: (code: number | null) => void
+  const exitCode = new Promise<number | null>((resolve) => {
+    resolveExit = resolve
+  })
+
+  const pty: vscode.Pseudoterminal = {
+    onDidWrite: writeEmitter.event,
+    onDidClose: closeEmitter.event,
+    open() {
+      const proc = childProcess.spawn("atlas", args, { cwd })
+
+      proc.stdout?.on("data", (data: Buffer) => {
+        writeEmitter.fire(data.toString().replace(/\r?\n/g, "\r\n"))
+      })
+
+      proc.stderr?.on("data", (data: Buffer) => {
+        writeEmitter.fire(data.toString().replace(/\r?\n/g, "\r\n"))
+      })
+
+      proc.on("exit", (code) => {
+        writeEmitter.fire(
+          `\r\n\x1b[2mProcess exited with code ${code}\x1b[0m\r\n`,
+        )
+        resolveExit(code)
+      })
+
+      proc.on("error", (err: NodeJS.ErrnoException) => {
+        if (err.code === "ENOENT") {
+          writeEmitter.fire(
+            `\r\n\x1b[31mCould not find 'atlas' on PATH. Is it installed?\x1b[0m\r\n`,
+          )
+        } else {
+          writeEmitter.fire(
+            `\r\n\x1b[31mFailed to start process: ${err.message}\x1b[0m\r\n`,
+          )
+        }
+        resolveExit(null)
+      })
+    },
+    close() {},
+  }
+
+  const terminal = vscode.window.createTerminal({ name: terminalName, pty })
+  terminal.show()
+
+  return { terminal, exitCode }
+}
+
 const stopAndServeButton = {
   iconPath: new vscode.ThemeIcon("debug-continue"),
   tooltip: "Stop others and serve this project",
@@ -604,7 +660,9 @@ export const openMenuCommand = (state: State) =>
             return
           }
 
-          // Stop all running serve sessions before syncback
+          const projectFile = selectedItem.projectFile
+          const wasServing = projectFile.path.fsPath in state.running
+
           for (const runningProject of Object.values(state.running)) {
             try {
               runningProject.stop()
@@ -613,19 +671,29 @@ export const openMenuCommand = (state: State) =>
             }
           }
 
-          const syncbackFolder = path.dirname(
-            selectedItem.projectFile.path.fsPath,
-          )
-          const syncbackFile = path.basename(
-            selectedItem.projectFile.path.fsPath,
+          const syncbackFolder = path.dirname(projectFile.path.fsPath)
+          const syncbackFile = path.basename(projectFile.path.fsPath)
+
+          const { terminal: syncbackTerminal, exitCode } = runAtlasCommand(
+            ["syncback", "--color", "always", syncbackFile],
+            syncbackFolder,
+            "Atlas: atlas syncback",
           )
 
-          const syncbackTerminal = vscode.window.createTerminal({
-            name: `Atlas: atlas syncback`,
-            cwd: syncbackFolder,
-          })
-          syncbackTerminal.show()
-          syncbackTerminal.sendText(`atlas syncback "${syncbackFile}"`)
+          if (wasServing) {
+            exitCode.then((code) => {
+              if (code === 0) {
+                syncbackTerminal.dispose()
+                try {
+                  serveProject(state, projectFile)
+                } catch (e: any) {
+                  vscode.window.showErrorMessage(
+                    `Failed to start serve after syncback: ${e.message}`,
+                  )
+                }
+              }
+            })
+          }
 
           input.hide()
           break
