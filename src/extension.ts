@@ -1,5 +1,6 @@
 import * as vscode from "vscode"
 import * as commands from "./commands"
+import { checkForAtlasUpdates } from "./checkForUpdates"
 import { RunningProject } from "./serveProject"
 import { updateButton } from "./updateButton"
 
@@ -105,6 +106,8 @@ export function activate(context: vscode.ExtensionContext) {
         context.globalState.update("news::multipleProjectFiles", undefined)
       })
   }
+
+  checkForAtlasUpdates(context).catch(() => {})
 }
 
 export function deactivate() {

@@ -1,10 +1,45 @@
 import * as childProcess from "child_process"
 import * as fs from "fs/promises"
+import * as os from "os"
 import * as path from "path"
 import { promisify } from "util"
 import * as vscode from "vscode"
 
 const exec = promisify(childProcess.exec)
+
+async function elevatedDelete(filePath: string): Promise<void> {
+  try {
+    await fs.unlink(filePath)
+    return
+  } catch (e: any) {
+    if (e.code === "EBUSY") {
+      throw new Error(
+        `The file "${filePath}" is locked by a running process. ` +
+          `Please stop any running Atlas sessions first, then try again.`,
+      )
+    }
+    if (e.code !== "EPERM" && e.code !== "EACCES") {
+      throw e
+    }
+  }
+
+  const platform = os.platform()
+  const escaped = filePath.replace(/"/g, '\\"')
+
+  let cmd: string
+  if (platform === "win32") {
+    cmd =
+      `powershell -Command "Start-Process powershell ` +
+      `-ArgumentList '-Command Remove-Item \\\"${escaped}\\\" -Force' ` +
+      `-Verb RunAs -Wait"`
+  } else if (platform === "darwin") {
+    cmd = `osascript -e 'do shell script "rm -f \\"${escaped}\\"" with administrator privileges'`
+  } else {
+    cmd = `pkexec rm -f "${escaped}"`
+  }
+
+  await exec(cmd)
+}
 import { buildProject } from "../buildProject"
 import { createProjectFile } from "../createProjectFile"
 import { State } from "../extension"
@@ -122,26 +157,22 @@ function showSwitchMessage(install: RojoInstall) {
             "Yes",
             "No",
           )
-          .then((answer) => {
+          .then(async (answer) => {
             if (answer !== "Yes") {
               return
             }
 
-            // User might have multiple rojo's in their path, reset this to allow showing the message again
             rokitMessageSent = false
 
-            return fs.unlink(install.resolvedPath)
-          })
-          .then(
-            () => {
+            try {
+              await elevatedDelete(install.resolvedPath)
               vscode.commands.executeCommand("vscode-atlas.openMenu")
-            },
-            (e) => {
+            } catch (e) {
               vscode.window.showErrorMessage(
-                `Could not complete operation: ${e}`,
+                `Could not delete atlas executable: ${e}`,
               )
-            },
-          )
+            }
+          })
       })
   }
 }
@@ -337,6 +368,16 @@ async function generateProjectMenu(
       action: "installPlugin",
       projectFile: projectFiles[0],
     },
+    ...(installType === InstallType.rokit
+      ? [
+          {
+            label: "$(sync) Check for Updates",
+            description: `Atlas v${allRojoVersions[0]}`,
+            action: "checkUpdates",
+            projectFile: projectFiles[0],
+          },
+        ]
+      : []),
     {
       label: "―――――――――――― Projects ―――――――――――",
       info: true,
@@ -658,6 +699,55 @@ export const openMenuCommand = (state: State) =>
               )
             })
 
+          break
+        }
+        case "checkUpdates": {
+          if (!selectedItem.projectFile) return
+          const updateFolder = path.dirname(
+            selectedItem.projectFile.path.fsPath,
+          )
+
+          input.hide()
+
+          await vscode.window.withProgress(
+            {
+              location: vscode.ProgressLocation.Notification,
+              title: "Checking for Atlas updates...",
+            },
+            async (progress) => {
+              let updateOutput: string
+              try {
+                const r = await exec("rokit update atlas", {
+                  cwd: updateFolder,
+                })
+                updateOutput = r.stdout || r.stderr
+              } catch {
+                try {
+                  const r = await exec("rokit update --global atlas")
+                  updateOutput = r.stdout || r.stderr
+                } catch (e: any) {
+                  vscode.window.showErrorMessage(
+                    `Could not update Atlas: ${e.stderr || e}`,
+                  )
+                  return
+                }
+              }
+
+              progress.report({ message: "Reinstalling Studio plugin..." })
+              try {
+                await exec("atlas plugin install")
+              } catch (e: any) {
+                vscode.window.showWarningMessage(
+                  `Atlas updated, but plugin reinstall failed: ${e.stderr || e}. ` +
+                    `Run "atlas plugin install" manually to avoid version mismatch.`,
+                )
+              }
+
+              vscode.window.showInformationMessage(
+                updateOutput.trim() || "Atlas is up to date.",
+              )
+            },
+          )
           break
         }
       }
